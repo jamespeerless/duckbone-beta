@@ -30,7 +30,7 @@ module Duckbone
       end
 
       def create_files
-        template "app.coffee", "app/assets/javascripts/duckbone/#{application_name.underscore}.js.coffee"
+        template "app.js", "app/assets/javascripts/duckbone/#{application_name.underscore}.js"
         template "controller.rb", "app/controllers/duckbone_controller.rb"
         template "view.erb", "app/views/duckbone/index.html.erb"
       end
