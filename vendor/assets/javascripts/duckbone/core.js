@@ -174,6 +174,31 @@ This file is loaded first and just establishes some namespaces and useful helper
         prettyTime[2] += (remainder > 1) ? " minutes" : " minute"
       }
       return _.compact(prettyTime).join(', ') + " ago";
+    },
+
+    dateToPrettyTimeLeft: function (date) {
+      var min = Math.floor((date.getTime() -new Date().getTime()) / 60000);
+      var remainder = min || 0, prettyTime = [], days, hours;
+      if (remainder == 0) {
+          return "happening now";
+      }
+      if (remainder >= 1400) {
+          days = Math.floor(remainder / 1440);
+          remainder -= days * 1440;
+          prettyTime[0] = days;
+          prettyTime[0] += (days > 1) ? " days" : " day"
+      }
+      if (remainder >= 60) {
+          hours = Math.floor(remainder / 60);
+          remainder -= hours * 60;
+          prettyTime[1] = hours;
+          prettyTime[1] += (hours > 1) ? " hours" : " hour";
+      }
+      if (remainder > 0) {
+          prettyTime[2] = remainder;
+          prettyTime[2] += (remainder > 1) ? " minutes" : " minute"
+      }
+      return _.compact(prettyTime).join(', ') + " left";
     }
 
   });

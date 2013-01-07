@@ -165,6 +165,22 @@ view to view. All of the bindings defined in `attributeChanges` use weak binding
         Duckbone.helpers.dateToPrettyTimeAgo(date) + '</span>'
       );
     });
+
+    // #### helper {{live\_countdown}}
+    // Creates a partial that can be used to insert a live countdown timer.
+    // Bindable view can use this to update it once per minute.
+    // The timestamp must be in a format natively parseable by Date.
+    // usage {{live_countdown "happening_at"}}
+    Handlebars.registerHelper("live_countdown", function(timestamp) {
+      var stamp = Duckbone.Handlebars.getAttr(this, timestamp);
+      if (!stamp) return "";
+      var date = new Date(stamp);
+      if (!date) return "";
+      return new Handlebars.SafeString(
+          '<span data-live-countdown="' + date.getTime() + '">' +
+              Duckbone.helpers.dateToPrettyTimeLeft(date) + '</span>'
+      );
+    });
   }
 
 }).call(this);
