@@ -3,7 +3,7 @@ module Duckbone
 
     # Detect all Handlebars files found in "app/assets"
     def self.all_handlebars_files
-      Dir.glob(Rails.root.join("app/assets/**/*.hbs"))
+      Dir.glob(Rails.root.join("app/assets/**/templates/**/*.hbs"))
     end
 
     # Template files are all .hbs files not beginning with an underscore
@@ -46,6 +46,45 @@ module Duckbone
     # Add dependencies so that changes to each template trigger recompilation
     def self.depend_on_all_handlebars_files (asset)
       all_handlebars_files.each { |hbs| asset.depend_on hbs }
+    end
+
+    def self.admin_handlebars_files
+      Dir.glob(Rails.root.join("app/assets/**/admin_templates/**/*.hbs"))
+    end
+
+    # Template files are all .hbs files not beginning with an underscore
+    def self.admin_template_files
+      admin_handlebars_files.select do |filename|
+        !filename.split('/').last.start_with?('_')
+      end
+    end
+
+
+    # Partial files are all .hbs files beginning with an underscore
+    def self.admin_partial_files
+      admin_handlebars_files.select do |filename|
+        filename.split('/').last.start_with?('_')
+      end
+    end
+    def self.package_admin(files, erb_binding)
+      templates = {}
+      files.each do |tmpl|
+        title = /.*\/admin_templates\/(.*).hbs/.match(tmpl)[1].gsub('/', '_')
+        template_text = File.open(Rails.root.join(tmpl)).read
+        templates[title] = ERB.new(template_text, nil, nil, "template_erb").result(erb_binding)
+      end
+      templates
+    end
+    def self.package_admin_templates(erb_binding)
+      package_admin(admin_template_files, erb_binding).to_json.html_safe
+    end
+
+    def self.package_admin_partials(erb_binding)
+      package_admin(admin_partial_files, erb_binding).to_json.html_safe
+    end
+
+    def self.depend_on_admin_handlebars_files (asset)
+      admin_handlebars_files.each { |hbs| asset.depend_on hbs }
     end
 
   end

@@ -137,8 +137,10 @@ so that it will either blow up or emit nothing without explicit work by the deve
         params.url = getUrl(model) || urlError();
       }
 
+      var alreadySetToken = false;
+
       // Ensure that we have the appropriate request data.
-      if (!params.data && model && (method == 'create' || method == 'update')) {
+      if (!params.data && model && (method == 'create' || method == 'update' || method == 'delete')) {
         params.contentType = 'application/json';
         var data = {}
         if(model.paramRoot) {
@@ -146,6 +148,13 @@ so that it will either blow up or emit nothing without explicit work by the deve
         } else {
           data = model.toJSON();
         }
+
+        if (authenticatedUser.token) {
+            data.token = authenticatedUser.token;
+            data.did = data.did || authenticatedUser.did;
+            alreadySetToken = true;
+        }
+
         params.data = JSON.stringify(data)
       }
 
@@ -155,11 +164,12 @@ so that it will either blow up or emit nothing without explicit work by the deve
       }
 
       // Add the user credentials if HTTP Auth is used
-      if (authenticatedUser.username) {
-        params.username = authenticatedUser.username;
-        params.password = authenticatedUser.password;
-        params.headers = params.headers || {};
-        params.headers['Authorization'] = 'Basic ' + encode64(params.username+':'+params.password);
+      if (!alreadySetToken && authenticatedUser.token) {
+          if(!params.data){
+              params.data = {};
+          }
+          params.data.token = authenticatedUser.token;
+          params.data.did = params.data.did || authenticatedUser.did;
       }
 
       // Make the request.
@@ -220,16 +230,15 @@ so that it will either blow up or emit nothing without explicit work by the deve
   //
   // Call this function with the user's credentials.
   // All subsequent requests will be signed by this user.
-  Duckbone.setAuthenticatedUser = function(username, password) {
-    authenticatedUser.username = username;
-    authenticatedUser.password = password;
+  Duckbone.setAuthenticatedUser = function(token, did) {
+    authenticatedUser.token = token;
+    authenticatedUser.did = did || -1;
   },
 
   // #### removeAuthenticatedUser
   // Clear the user's credentials.
   Duckbone.removeAuthenticatedUser = function() {
-    delete authenticatedUser.username;
-    delete authenticatedUser.password;
+    delete authenticatedUser.token;
   }
 
   // Singleton authenticatedUser which holds the credentials inside this closure
