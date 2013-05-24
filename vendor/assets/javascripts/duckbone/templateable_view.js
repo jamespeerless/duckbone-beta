@@ -243,6 +243,14 @@ For example:
     );
   });
 
+  Handlebars.registerHelper('attr_html', function(attribute){
+      return new Handlebars.SafeString(
+          '<span data-bind="attr_' + Handlebars.Utils.escapeExpression(attribute) + '">' +
+          this.get(attribute) +
+          '</span>'
+      );
+  });
+
   // #### helper {{child}}
   // The "child" helper indicates where sub-views should be included in a template.
   // `renderTemplate()` will look for a view with this name defined as a prop on the parent view
